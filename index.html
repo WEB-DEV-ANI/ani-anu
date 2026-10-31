@@ -152,6 +152,32 @@
     <source src="./song.mp3" type="audio/mpeg">
 </audio>
   <script>
+    const weddingSong = document.getElementById('weddingSong');
+    let playbackPending = false;
+
+    function retryWeddingSong(fromUserGesture = false) {
+      if (!weddingSong.paused || playbackPending) return;
+      playbackPending = true;
+      weddingSong.play().catch(error => {
+        playbackPending = false;
+        if (fromUserGesture) console.warn('Unable to play the wedding song:', error);
+      }).then(() => {
+        if (!weddingSong.paused) {
+          document.removeEventListener('pointerdown', retryFromGesture);
+          document.removeEventListener('touchstart', retryFromGesture);
+          document.removeEventListener('keydown', retryFromGesture);
+        }
+      });
+    }
+
+    function retryFromGesture() {
+      retryWeddingSong(true);
+    }
+
+    document.addEventListener('pointerdown', retryFromGesture);
+    document.addEventListener('touchstart', retryFromGesture, { passive: true });
+    document.addEventListener('keydown', retryFromGesture);
+    retryWeddingSong();
 
     // Floating rose petals and soft gold motes; automatically respects reduced-motion settings.
     (function(){
